@@ -169,3 +169,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+#To prevent version controled deck lists from being uploaded to the repo
+!decks/.gitkeep
