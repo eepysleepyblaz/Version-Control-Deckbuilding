@@ -172,4 +172,5 @@ cython_debug/
 
 
 #To prevent version controled deck lists from being uploaded to the repo
+decks/*
 !decks/.gitkeep
