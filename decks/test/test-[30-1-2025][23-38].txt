@@ -7,7 +7,7 @@
 1 Blatant Thievery
 1 Cancel
 1 Candlekeep Inspiration
-1 Chart a Course
+1 Spore Frog
 1 Concentrate
 1 Consuming Tide
 1 Copy Enchantment
@@ -27,7 +27,7 @@
 1 Hurkyl's Final Meditation
 1 Imprisoned in the Moon
 34 Island
-1 Jace Beleren
+1 Renata, Called to the Hunt
 1 Leyline of Anticipation
 1 Mana Leak
 1 Memory Lapse

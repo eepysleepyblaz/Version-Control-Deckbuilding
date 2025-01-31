@@ -9,7 +9,7 @@ import datetime
 #For get card images
 import webbrowser
 
-#Handles the creation of vertions of file
+#Handles the creation of vertions of file and viewing of the versions
 class Version_Control():
     
     def __init__(self, name):
@@ -31,17 +31,76 @@ class Version_Control():
 
         #Writes the contents into the correct new file
         date = datetime.datetime.now()
-        with open(os.path.join(self.full_path, f'{self.name}-[{date.day}-{date.month}-{date.year}][{date.hour}-{date.minute}].txt'), 'w') as f:
+        filename = f'{self.name}-[{date.day:2d}-{date.month:2d}-{date.year:4d}][{date.hour:2d}-{date.minute:2d}].txt'
+        with open(os.path.join(self.full_path, filename), 'w') as f:
             f.write(content)
+
+        #Returns the files new name
+        return filename
 
     #Lists all the versions associated with this file
     def list(self):
         files = os.listdir(self.full_path)
         return files
     
+    #Returns a specific deck list
+    #By default the most recently commited
+    def get(self, version=None):
+        files = os.listdir(self.full_path)
+
+        #If a specific date is given
+        #The form is (d)d-(m)m-yyyy-(h)h-(m)m
+        if version != None:
+            version = version.split("-")
+            with open(os.path.join(self.full_path, f"{self.name}-[{version[0]}-{version[1]}-{version[2]}][{version[3]}{version[4]}].txt"), "r") as f:
+                contents = f.read()
+        
+        #If no date is given
+        else:
+            newest_version = self.most_recent()
+            print(newest_version)
+            with open(os.path.join(self.full_path, newest_version), "r") as f:
+                contents = f.read()
+        
+        return contents
+    
+    #Gets the most recent file
+    def most_recent(self):
+        newest_version = None
+        files = os.listdir(self.full_path)
+
+        #Finds the most recent day of commits
+        #recent_day = (day, month, year)
+        recent_day = [0, 0, 0]
+        for file in files:
+            if int(file.split("]")[0].split("-")[-1]) >= recent_day[2]:
+                if int(file.split("]")[0].split("-")[-2]) >= recent_day[1]:
+                    if int(file.split("]")[0].split("-")[-3][1:]) >= recent_day[0]:
+                        recent_day = [int(file.split("]")[0].split("-")[-3][1:]),
+                                        int(file.split("]")[0].split("-")[-2]),
+                                        int(file.split("]")[0].split("-")[-1])]
+        #recent_time = (hour, min)
+        recent_time = [0, 0]
+        #Finds the most recent file in the most recent day
+        for file in files:
+            if [int(file.split("]")[0].split("-")[-3][1:]),
+                int(file.split("]")[0].split("-")[-2]),
+                int(file.split("]")[0].split("-")[-1])] == recent_day:
+
+                time = [int(file.split("[")[2].split("-")[0]), int(file.split("[")[2].split("-")[1][:-5])]
+                
+                if time[0] > recent_time[0]:
+                    recent_time = [int(file.split("[")[2].split("-")[0]), int(file.split("[")[2].split("-")[1][:-5])]
+                    newest_version = file
+                elif time[0] == recent_time[0] and time[1] > recent_time[1]:
+                    recent_time = [int(file.split("[")[2].split("-")[0]), int(file.split("[")[2].split("-")[1][:-5])]
+                    newest_version = file
+
+        return newest_version
+    
     #Creates a webpage of a specific deck list and opens it
     def webshow(self, filename):
-        with open(os.path.join(self.full_path, filename)) as f:
+        with open(os.path.join(self.full_path, filename), "r") as f:
             contents = f.read()
         
         contents = contents.split("\n")
@@ -74,13 +133,9 @@ class Version_Control():
 
 
 
-
-
-
-
-
 #Test code
 a = Version_Control("test")
 a.commit("C:/Users/myaccount/Downloads/mono-blue.txt")
 print(a.list())
-a.webshow("test-[30-1-2025][23-38].txt")
+print(a.get())
+#a.webshow("test-[30-1-2025][23-38].txt")
