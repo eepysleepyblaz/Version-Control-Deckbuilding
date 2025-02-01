@@ -52,7 +52,9 @@ class Version_Control():
         #The form is (d)d-(m)m-yyyy-(h)h-(m)m
         if version != None:
             version = version.split("-")
-            with open(os.path.join(self.full_path, f"{self.name}-[{version[0]}-{version[1]}-{version[2]}][{version[3]}{version[4]}].txt"), "r") as f:
+            filename = f"{self.name}-[{version[1][1:]}-{version[2]}-{version[3].split(']')[0]}][{version[3].split('[')[1]}-{version[4][:-1]}].txt"
+            print(filename)
+            with open(os.path.join(self.full_path, filename), "r") as f:
                 contents = f.read()
         
         #If no date is given
