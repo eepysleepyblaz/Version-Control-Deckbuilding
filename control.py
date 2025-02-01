@@ -31,7 +31,7 @@ class Version_Control():
 
         #Writes the contents into the correct new file
         date = datetime.datetime.now()
-        filename = f'{self.name}-[{date.day:2d}-{date.month:2d}-{date.year:4d}][{date.hour:2d}-{date.minute:2d}].txt'
+        filename = f'{self.name}-[{date.day:02}-{date.month:02}-{date.year:04}][{date.hour:02}-{date.minute:02}].txt'
         with open(os.path.join(self.full_path, filename), 'w') as f:
             f.write(content)
 
@@ -128,14 +128,8 @@ class Version_Control():
         
         #Opens the file
         webbrowser.open('temp.htm')
-        input()
+        input("Press enter to quit viewing the deck")
         os.remove('temp.htm')
 
 
 
-#Test code
-a = Version_Control("test")
-a.commit("C:/Users/myaccount/Downloads/mono-blue.txt")
-print(a.list())
-print(a.get())
-#a.webshow("test-[30-1-2025][23-38].txt")
