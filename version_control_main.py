@@ -22,7 +22,12 @@ class Ui():
          'commit': self.commit_deck,
          'pull': self.pull_deck,
          'show': self.show_deck,
-         'mkrepo':self.create_repo}
+         'mkrepo':self.create_repo,
+         'cr': self.enter_repo,
+         'exr': self.exit_repo}
+        
+        #Saves the repository that is currently open
+        self.current_repo = None
         
     #Parses user commands and trys to run it
     def parse(self, command):
@@ -45,9 +50,10 @@ class Ui():
         if len(inspect.signature(self.command_dict[command[0]]).parameters) > len(command[1:]) + extra:
             return f"{command[0]} takes {len(inspect.signature(self.command_dict[command[0]]).parameters) - extra} required parameters. You provided {len(command[1:])}"
 
-        #Checks if the repo exists and if the command isn't to make that repository
-        if command[1] not in self.list_repo() and command[0] != "mkrepo":
-            return "That repository does not exists"
+        #Checks if the user is currently in a repo
+        #Ignored if the user is listing, creating a repo, or entering a repo
+        if self.current_repo == None and not (command[0] == "mkrepo" or command[0] == "cr", command[0] == "lr"):
+            return "Not in a repository"
 
         #Trys to run the command
         try:
@@ -56,31 +62,44 @@ class Ui():
             return "Command failed. Bad arguments."
     
 
-    #Lets the user creates new repository for deck lists
-    def create_repo(self, name):
+    #Lets the user creates new repository for deck lists and then can enter that repo
+    def create_repo(self, name, *args):
         if name not in self.list_repo():
             temp = Version_Control(name)
+            temp.make_repo()
 
+        #Checks for extra aruments
+        #Checks if the user wants to enter that repo too
+        if "-e" in args or "-E" in args:
+            self.enter_repo(name)
         
     #Lists the existing repos
     def list_repo(self):
-        repos = os.listdir(os.path.join(os.path.dirname(__file__), 'decks'))
-        repos = [x for x in repos if x[0] != '.']
-        return repos
-    
+        if self.current_repo == None:
+            repos = os.listdir(os.path.join(os.path.dirname(__file__), 'decks'))
+            repos = [x for x in repos if x[0] != '.']
+            return repos
+        else:
+            test = Version_Control(self.current_repo)
+            return test.list()
+
+    #Lets the user move into a repo
+    def enter_repo(self, name):
+        if name in self.list_repo():
+            self.current_repo = name
+
     #Lets the user commit to a repo they have created
-    def commit_deck(self, name, path):
-        temp = Version_Control(name)
+    def commit_deck(self, path):
+        temp = Version_Control(self.current_repo)
         temp.commit(path)
 
     #Pulls the most recent or a specific version of a deck
-    def pull_deck(self, name, *args):
-        temp = Version_Control(name)
+    def pull_deck(self, *args):
+        temp = Version_Control(self.current_repo)
 
         #Handling the extra arguments
         #Checks if a version of the deck has been provided
         version = None
-        print(temp.list())
         for arg in args:
             if arg + ".txt" in temp.list():
                 version = arg
@@ -94,35 +113,43 @@ class Ui():
             t.clipboard_clear()
             t.clipboard_append(deck[1])
 
+        #Check is the user wants to skip the text output of the deck list
+        if "-h" in args or "-H" in args:
+            return
+
         return "\n".join(deck)
 
     #Opens a visual display of a deck
-    def show_deck(self, name, deckname=None):
-        temp = Version_Control(name)
+    def show_deck(self, *args):
+        temp = Version_Control(self.current_repo)
+
+        #Checks if the deckname of the deck has been provided
+        deckname = None
+        for arg in args:
+            if arg + ".txt" in temp.list():
+                deckname = arg + ".txt"
 
         #If the deckname is nothing use the most recent deck
         if deckname == None:
             deckname = temp.most_recent()
-        else:
-            deckname = deckname + ".txt"
+
 
         temp.webshow(deckname)
     
-    #Makes a repository of a given name for decks
-    def create_repository(self, name):
-        temp = Version_Control(name)
-        
-        temp.make_repo()
+    #Exits the current repo
+    def exit_repo(self):
+        self.current_repo = None 
 
 #Main body of the program
 exit = False
 interface = Ui()
 
-print("Version conroled deck building ready...")
+print("Version controled deck building ready...")
 
 #Main loop
 while not exit:
-    user_input = input("|>>->")
+    repo_display = [interface.current_repo if interface.current_repo != None else '']
+    user_input = input(f"|>>-{repo_display[0]}>")
     result = interface.parse(user_input)
 
     #Prints a result to the screen if it needs printing

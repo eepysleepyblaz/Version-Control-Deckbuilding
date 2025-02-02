@@ -61,7 +61,6 @@ class Version_Control():
         #If no date is given
         else:
             filename = self.most_recent()
-            print(filename)
             with open(os.path.join(self.full_path, filename), "r") as f:
                 contents = f.read()
         
