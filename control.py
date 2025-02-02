@@ -16,6 +16,8 @@ class Version_Control():
         self.name = name
         self.dir_path =  os.path.join("decks", name)
         self.full_path = os.path.join(os.path.dirname(__file__), self.dir_path)
+    
+    def make_repo(self):
         #Checks if a directory for this deck exists yet
         #If not create one
         if not os.path.isdir(self.full_path):
@@ -53,18 +55,17 @@ class Version_Control():
         if version != None:
             version = version.split("-")
             filename = f"{self.name}-[{version[1][1:]}-{version[2]}-{version[3].split(']')[0]}][{version[3].split('[')[1]}-{version[4][:-1]}].txt"
-            print(filename)
             with open(os.path.join(self.full_path, filename), "r") as f:
                 contents = f.read()
         
         #If no date is given
         else:
-            newest_version = self.most_recent()
-            print(newest_version)
-            with open(os.path.join(self.full_path, newest_version), "r") as f:
+            filename = self.most_recent()
+            print(filename)
+            with open(os.path.join(self.full_path, filename), "r") as f:
                 contents = f.read()
         
-        return contents
+        return filename, contents
     
     #Gets the most recent file
     def most_recent(self):
