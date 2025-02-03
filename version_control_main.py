@@ -123,11 +123,11 @@ class Ui():
     def show_deck(self, *args):
         temp = Version_Control(self.current_repo)
 
-        #Checks if the deckname of the deck has been provided
+        #Checks if the date of the deck has been provided
         deckname = None
         for arg in args:
-            if arg + ".txt" in temp.list():
-                deckname = arg + ".txt"
+            if temp.name + "-" + arg + ".txt" in temp.list():
+                deckname = temp.name + "-" + arg + ".txt"
 
         #If the deckname is nothing use the most recent deck
         if deckname == None:
