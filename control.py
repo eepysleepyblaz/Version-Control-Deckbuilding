@@ -31,6 +31,14 @@ class Version_Control():
         with open(path, 'r') as f:
             content = f.read()
 
+        #Removes any blank lines
+        content = content.split("\n")
+        temp_content = []
+        for line in content:
+            if line != "":
+                temp_content.append(line)
+        content = "\n".join(temp_content)
+
         #Writes the contents into the correct new file
         date = datetime.datetime.now()
         filename = f'{self.name}-[{date.day:02}-{date.month:02}-{date.year:04}][{date.hour:02}-{date.minute:02}].txt'
@@ -43,6 +51,8 @@ class Version_Control():
     #Lists all the versions associated with this file
     def list(self):
         files = os.listdir(self.full_path)
+        for i in range(len(files)):
+            files[i] = "-".join(files[i].split("-")[1:]).split(".")[0]
         return files
     
     #Returns a specific deck list
@@ -54,7 +64,7 @@ class Version_Control():
         #The form is (d)d-(m)m-yyyy-(h)h-(m)m
         if version != None:
             version = version.split("-")
-            filename = f"{self.name}-[{version[1][1:]}-{version[2]}-{version[3].split(']')[0]}][{version[3].split('[')[1]}-{version[4][:-1]}].txt"
+            filename = f"{self.name}-{'-'.join(version)}.txt"
             with open(os.path.join(self.full_path, filename), "r") as f:
                 contents = f.read()
         
@@ -64,7 +74,7 @@ class Version_Control():
             with open(os.path.join(self.full_path, filename), "r") as f:
                 contents = f.read()
         
-        return filename, contents
+        return "-".join(filename.split("-")[1:]).split(".")[0], contents
     
     #Gets the most recent file
     def most_recent(self):

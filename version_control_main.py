@@ -19,12 +19,13 @@ class Ui():
         #Defines the command list
         self.command_dict = {'cr': self.create_repo,
          'lr': self.list_repo,
-         'commit': self.commit_deck,
+         'push': self.commit_deck,
          'pull': self.pull_deck,
          'show': self.show_deck,
          'mkrepo':self.create_repo,
          'cr': self.enter_repo,
-         'exr': self.exit_repo}
+         'exr': self.exit_repo,
+         'cmp':self.compare_decks}
         
         #Saves the repository that is currently open
         self.current_repo = None
@@ -101,7 +102,7 @@ class Ui():
         #Checks if a version of the deck has been provided
         version = None
         for arg in args:
-            if arg + ".txt" in temp.list():
+            if arg in temp.list():
                 version = arg
 
         deck = temp.get(version)
@@ -126,7 +127,7 @@ class Ui():
         #Checks if the date of the deck has been provided
         deckname = None
         for arg in args:
-            if temp.name + "-" + arg + ".txt" in temp.list():
+            if arg in temp.list():
                 deckname = temp.name + "-" + arg + ".txt"
 
         #If the deckname is nothing use the most recent deck
@@ -139,6 +140,48 @@ class Ui():
     #Exits the current repo
     def exit_repo(self):
         self.current_repo = None 
+
+
+    #Compares a deck with the most current deck for different cards
+    def compare_decks(self, deck, *args):
+        temp = Version_Control(self.current_repo)
+        current_deck = temp.get()[1]
+        target_deck = temp.get(deck)[1]
+        current_deck = current_deck.split("\n")
+        target_deck = target_deck.split("\n")
+
+        #Turns the current version deck into a dictionary mapping card name to quantities
+        combined_dic = {}
+
+        for card in current_deck:
+            card = card.split(" ")
+            combined_dic[" ".join(card[1:])] = int(card[0])
+
+        #Loops through the current deck to find card quantitly missmatches
+        current_deck = list(combined_dic.keys())
+        output = []
+        for card in target_deck:
+            card = card.split(" ")
+            if " ".join(card[1:]) in current_deck:
+                combined_dic[" ".join(card[1:])] = combined_dic[" ".join(card[1:])] - int(card[0])
+            
+            else:
+                combined_dic[" ".join(card[1:])] = -int(card[0])
+
+        #Interates to inculed all card that map to a non zero delta of quantity change
+        for card in combined_dic:
+            quantity = combined_dic[card]
+            
+            if quantity != 0:
+                #Sorts the output to have all the add apperare before the removes
+                if quantity > 0:
+                    output = [f"+{quantity} {card}"] + output
+                else:
+                    output.append(f"{quantity} {card}")
+
+        return output
+
+
 
 #Main body of the program
 exit = False
@@ -155,7 +198,7 @@ while not exit:
     #Prints a result to the screen if it needs printing
     if result != None:
         if type(result ) == list:
-            result = ", ".join(result)
+            result = ",\n".join(result)
 
         print(result)
     
